@@ -11,10 +11,15 @@ jobs:
     if: github.head_ref == 'develop'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/github-script@v6
+      - name: Add ignore status label
+        uses: actions/github-script@v6
+        env:
+          TZ: Asia/Tokyo
         with:
           script: |
             github.rest.issues.addLabels({
-              ...context.repo,
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
               labels: ["ignore-stats"]
-            });
+            })
