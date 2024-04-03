@@ -2,13 +2,13 @@ name: Add ignore status label
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, reopened, synchronize, edited]
     branches:
-      - develop
+      - main
 
 jobs:
   add-ignore-label:
-    if: github.base_ref == 'main'
+    if: github.head_ref == 'develop'
     runs-on: ubuntu-latest
     steps:
       - name: Add ignore status label
@@ -16,10 +16,9 @@ jobs:
         env:
           TZ: Asia/Tokyo
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             github.rest.issues.addLabels({
               ...context.repo,
-              issue_number: pr.number,
+              issue_number: context.issue.number,
               labels: ["ignore-stats"]
             })
