@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Add ignore status label
-        uses: actions/github-script@v6
+        uses: actions/github-script@v6.1.0
         env:
           TZ: Asia/Tokyo
         with:
