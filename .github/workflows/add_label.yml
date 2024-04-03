@@ -2,7 +2,7 @@ name: Add ignore status label
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, reopened, synchronize, edited]
     branches:
       - develop
 
@@ -19,6 +19,6 @@ jobs:
           script: |
             github.rest.issues.addLabels({
               ...context.repo,
-              issue_number: pr.number,
+              issue_number: context.issue.number,
               labels: ["ignore-stats"]
             })
