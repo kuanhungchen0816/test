@@ -2,16 +2,20 @@ name: Add ignore status label
 
 on:
   pull_request:
-    types: [opened, reopened, synchronize, edited]
+    types: [closed]
     branches:
       - main
 
 jobs:
-  add-ignore-label:
-    if: github.head_ref == 'develop'
+  add-ignore-label22:
     runs-on: ubuntu-latest
     steps:
+      - name: echo
+        run: echo "hello"
       - name: Add ignore status label
+        if: >-
+          github.event.pull_request.merged == true &&
+          github.head_ref == 'develop'
         uses: actions/github-script@v7
         env:
           TZ: Asia/Tokyo
