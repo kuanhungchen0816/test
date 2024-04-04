@@ -27,7 +27,7 @@ jobs:
         if: ${{ steps.check_pr.outputs.count == 0 }}
         run: |
           gh pr create \
-            -B main \
+            -B develop \
             -t '【本番反映】${{ steps.check_pr.outputs.message }}' \
             -a ${{ github.actor }}  \
             --body "body"
