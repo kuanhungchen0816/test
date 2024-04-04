@@ -1,0 +1,43 @@
+name: Create Pull Request for master when merged directly into release
+
+on:
+  pull_request:
+    types: [closed]
+    branches: ['main']
+
+jobs:
+  create-pr:
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.head_ref != 'develop'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check PullRequest Exists
+        id: check_pr
+        env:
+            HEAD_MESSAGE: ${{ github.event.pull_request.head.sha }}
+        run: |
+          COMMIT_MESSAGE=$(echo "${HEAD_MESSAGE}" | sed -n -e 1p)
+          echo "message=${COMMIT_MESSAGE}" >> "$GITHUB_OUTPUT"
+          echo "count=$(gh pr list -S '本番反映'in:title | wc -l)" >> "$GITHUB_OUTPUT"
+      - name: Create Release Pull Request
+        if: ${{ steps.check_pr.outputs.count == 0 }}
+        run: |
+          gh pr create \
+            -B develop \
+            -t '【本番反映】${{ steps.check_pr.outputs.message }}' \
+            -a ${{ github.actor }}  \
+            --body "body"
+      - name: Edit Release Pull Request
+        if: ${{ steps.check_pr.outputs.count != 0 }}
+        run: |
+          pr_data=$(gh pr list -S '本番反映'in:title \
+            --json "title" \
+            | jq -c .[])
+          TITLE="$(echo $pr_data | jq -r '.title')"
+          echo $TITLE
+          gh pr edit  ${{ github.ref_name }} \
+            -t "${TITLE} / ${{ steps.check_pr.outputs.message }}"
