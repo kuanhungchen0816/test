@@ -18,7 +18,7 @@ jobs:
       - name: Check PullRequest Exists
         id: check_pr
         env:
-            HEAD_MESSAGE: ${{ github.event.pull_request.head }}
+            HEAD_MESSAGE: ${{ github.event.pull_request.head.sha }}
         run: |
           COMMIT_MESSAGE=$(echo "${HEAD_MESSAGE}" | sed -n -e 1p)
           echo "message=${COMMIT_MESSAGE}" >> "$GITHUB_OUTPUT"
