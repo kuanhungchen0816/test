@@ -24,4 +24,4 @@ jobs:
         run: |
           echo "count=${{ steps.check_pr.outputs.count }}"
           echo "message=${{ steps.check_pr.outputs.message }}"
-          echo "$(gh pr list -B main -H develop -S | wc -l)"
+          echo "$(gh pr list -B main -H develop -S '【Release → Master】' | wc -l)"
