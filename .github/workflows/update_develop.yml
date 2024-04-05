@@ -17,15 +17,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check PullRequest Exists
         id: check_pr
-        env:
-            HEAD_MESSAGE: ${{ github.event.pull_request.head.sha }}
         run: |
-          COMMIT_MESSAGE=$(echo "${HEAD_MESSAGE}" | sed -n -e 1p)
-          echo "message=${COMMIT_MESSAGE}" >> "$GITHUB_OUTPUT"
-          echo "count=$(gh pr list -B main -H develop -S | wc -l)" >> "$GITHUB_OUTPUT"
-      - name: test
-        run: |
-          echo "count=${{ steps.check_pr.outputs.count }}"
+          echo "count=$(gh pr list -B develop -H main -S '【Release → Master】' | wc -l)" >> "$GITHUB_OUTPUT"
       - name: Create Release Pull Request
         if: ${{ steps.check_pr.outputs.count == 0 }}
         run: |
