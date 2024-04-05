@@ -8,8 +8,6 @@ on:
 jobs:
   create-pr:
     runs-on: ubuntu-latest
-    env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - name: Check PullRequest Exists
