@@ -1,0 +1,30 @@
+name: Create Pull Request for master when merged directly into release
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited]
+    branches: ['main']
+
+jobs:
+  create-pr:
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.head_ref != 'develop'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check PullRequest Exists
+        id: check_pr
+        env:
+            HEAD_MESSAGE: ${{ github.event.pull_request.head.sha }}
+        run: |
+          COMMIT_MESSAGE=$(echo "${HEAD_MESSAGE}" | sed -n -e 1p)
+          echo "message=${COMMIT_MESSAGE}" >> "$GITHUB_OUTPUT"
+          echo "count=$(gh pr list -B main -H develop -S | wc -l)" >> "$GITHUB_OUTPUT"
+      - name: test
+        run: |
+          echo "count=${{ steps.check_pr.outputs.count }}"
+          echo "message=${{ steps.check_pr.outputs.message }}"
+          echo "gh pr list -B main -H develop -S | wc -l)"
