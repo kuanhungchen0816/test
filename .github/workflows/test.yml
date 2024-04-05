@@ -19,7 +19,7 @@ jobs:
         run: |
           COMMIT_MESSAGE=$(echo "${HEAD_MESSAGE}" | sed -n -e 1p)
           echo "message=${COMMIT_MESSAGE}" >> "$GITHUB_OUTPUT"
-          echo "count=$(gh pr list -B main -H develop -S | wc -l)" >> "$GITHUB_OUTPUT"
+          echo "count=$(gh pr list -B develop -H main -S | wc -l)" >> "$GITHUB_OUTPUT"
       - name: test
         run: |
           echo "count=${{ steps.check_pr.outputs.count }}"
