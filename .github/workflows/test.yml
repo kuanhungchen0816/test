@@ -27,13 +27,13 @@ jobs:
       - name: Make branch when update-branch not exist
         if: ${{ steps.check_branch.outputs.update-branch-exist == 'false' }}
         run: |
-          git checkout release
+          git checkout main
           git checkout -b update-master
       - name: Update branch when update-branch exist
         if: ${{ steps.check_branch.outputs.update-branch-exist == 'true' }}
         run: |
           git checkout update-master
-          git merge release
+          git merge main
       - name: Check PullRequest Exists
         id: check_pr
         env:
