@@ -27,13 +27,13 @@ jobs:
       - name: Make branch when update-branch not exist
         if: ${{ steps.check_branch.outputs.update-branch-exist == 'false' }}
         run: |
-          gh pr checkout main
+          gh pr checkout develop
           git checkout -b update-master
       - name: Update branch when update-branch exist
         if: ${{ steps.check_branch.outputs.update-branch-exist == 'true' }}
         run: |
           gh pr checkout update-master
-          git merge main
+          git merge develop
       - name: Check PullRequest Exists
         id: check_pr
         env:
@@ -41,9 +41,9 @@ jobs:
         run: |
           COMMIT_MESSAGE=$(echo "${HEAD_MESSAGE}" | sed -n -e 1p)
           echo "message=${COMMIT_MESSAGE}" >> "$GITHUB_OUTPUT"
-          echo "count=$(gh pr list -B develop -H update-master -S '【Release → Master】' | wc -l)" >> "$GITHUB_OUTPUT"
+          echo "count=$(gh pr list -B update-master -H main -S '【Release → Master】' | wc -l)" >> "$GITHUB_OUTPUT"
       - name: test
         run: |
           echo "count=${{ steps.check_pr.outputs.count }}"
           echo "message=${{ steps.check_pr.outputs.message }}"
-          echo "$(gh pr list -B develop -H update-master -S '【Release → Master】' | wc -l)"
+          echo "$(gh pr list -B update-master -H main -S '【Release → Master】' | wc -l)"
