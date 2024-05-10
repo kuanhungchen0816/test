@@ -12,6 +12,28 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+      - name: Chek UpdateBranch branch Exists
+        id: check_branch
+        run: |
+          branch_is_existing=$(
+            git fetch origin update-master &&
+            echo true ||
+            echo false
+          )
+          echo "update-branch-exist=${branch_is_existing}" >> $GITHUB_OUTPUT
+      - name: update-branch-exist
+        run: |
+          echo "update-branch-exist=${{ steps.check_branch.outputs.update-branch-exist }}"
+      - name: Make branch when update-branch not exist
+        if: ${{ steps.check_branch.outputs.update-branch-exist == 'false' }}
+        run: |
+          git checkout release
+          git checkout -b update-master
+      - name: Update branch when update-branch exist
+        if: ${{ steps.check_branch.outputs.update-branch-exist == 'true' }}
+        run: |
+          git checkout update-master
+          git merge release
       - name: Check PullRequest Exists
         id: check_pr
         env:
