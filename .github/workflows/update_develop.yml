@@ -47,8 +47,9 @@ jobs:
       - name: When update-branch exist
         if: ${{ steps.check_branch2.outputs.update-branch-exist == 'true' }}
         run: |
+          git fetch origin main
           git checkout update-master
-          git pull --no-ff origin main
+          git merge origin/main
           git push origin update-master 
       - name: Check PullRequest Exists
         id: check_pr
