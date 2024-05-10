@@ -29,11 +29,27 @@ jobs:
           echo "update-branch-exist=${{ steps.check_branch.outputs.update-branch-exist }}"
       - name: Make branch when update-branch not exist
         if: ${{ steps.check_branch.outputs.update-branch-exist == 'false' }}
-        uses: EndBug/add-and-commit@v9
-        with:
-          default_author: github_actions
-          new_branch: update-master
-          push: origin update-mastert --set-upstream --force
+        run: |
+          git checkout -b update-master
+          git push origin update-master
+      - name: Chek UpdateBranch branch Exists
+        id: check_branch2
+        run: |
+          branch_is_existing=$(
+            git fetch origin update-master &&
+            echo true ||
+            echo false
+          )
+          echo "update-branch-exist=${branch_is_existing}" >> $GITHUB_OUTPUT
+      - name: update-branch-exist
+        run: |
+          echo "update-branch-exist=${{ steps.check_branch2.outputs.update-branch-exist }}"
+      - name: When update-branch exist
+        if: ${{ steps.check_branch2.outputs.update-branch-exist == 'true' }}
+        run: |
+          git checkout update-master
+          git pull origin main
+          git push origin update-master
       - name: Check PullRequest Exists
         id: check_pr
         run: |
