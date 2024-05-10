@@ -15,15 +15,51 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+      - name: Chek UpdateBranch branch Exists
+        id: check_branch
+        run: |
+          branch_is_existing=$(
+            git fetch origin update-master &&
+            echo true ||
+            echo false
+          )
+          echo "update-branch-exist=${branch_is_existing}" >> $GITHUB_OUTPUT
+      - name: update-branch-exist
+        run: |
+          echo "update-branch-exist=${{ steps.check_branch.outputs.update-branch-exist }}"
+      - name: Make branch when update-branch not exist
+        if: ${{ steps.check_branch.outputs.update-branch-exist == 'false' }}
+        run: |
+          git checkout -b update-master
+          git push origin update-master
+      - name: Chek UpdateBranch branch Exists
+        id: check_branch2
+        run: |
+          branch_is_existing=$(
+            git fetch origin update-master &&
+            echo true ||
+            echo false
+          )
+          echo "update-branch-exist=${branch_is_existing}" >> $GITHUB_OUTPUT
+      - name: update-branch-exist
+        run: |
+          echo "update-branch-exist=${{ steps.check_branch2.outputs.update-branch-exist }}"
+      - name: When update-branch exist
+        if: ${{ steps.check_branch2.outputs.update-branch-exist == 'true' }}
+        run: |
+          git checkout update-master
+          git pull origin main
+          git push origin update-master
       - name: Check PullRequest Exists
         id: check_pr
         run: |
-          echo "count=$(gh pr list -B develop -H main -S '【Release → Master】' | wc -l)" >> "$GITHUB_OUTPUT"
+          echo "count=$(gh pr list -B develop -H update-master -S '【Release → Master】' | wc -l)" >> "$GITHUB_OUTPUT"
       - name: Create Release Pull Request
         if: ${{ steps.check_pr.outputs.count == 0 }}
         run: |
           gh pr create \
             -B develop \
+            -H update-master \
             -t '【Release → Master】masterブランチの最新化' \
             -a ${{ github.actor }}  \
             --body "release → master "
