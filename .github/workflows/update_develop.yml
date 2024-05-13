@@ -13,13 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      UPDATE_BRANCH: update-master
     steps:
       - uses: actions/checkout@v4
       - name: Chek UpdateBranch branch Exists
         id: check_branch
         run: |
           branch_is_existing=$(
-            git fetch origin update-master &&
+            git fetch origin ${{env.UPDATE_BRANCH}} &&
             echo true ||
             echo false
           )
@@ -30,13 +31,13 @@ jobs:
       - name: Make branch when update-branch not exist
         if: ${{ steps.check_branch.outputs.update-branch-exist == 'false' }}
         run: |
-          git checkout -b update-master
-          git push origin update-master
+          git checkout -b ${{env.UPDATE_BRANCH}}
+          git push origin ${{env.UPDATE_BRANCH}}
       - name: Chek UpdateBranch branch Exists
         id: check_branch2
         run: |
           branch_is_existing=$(
-            git fetch origin update-master &&
+            git fetch origin ${{env.UPDATE_BRANCH}} &&
             echo true ||
             echo false
           )
@@ -47,19 +48,19 @@ jobs:
       - name: When update-branch exist
         if: ${{ steps.check_branch2.outputs.update-branch-exist == 'true' }}
         run: |
-          git checkout update-master
+          git checkout ${{env.UPDATE_BRANCH}}
           git reset --hard origin/main
-          git push origin update-master -f
+          git push origin ${{env.UPDATE_BRANCH}} -f
       - name: Check PullRequest Exists
         id: check_pr
         run: |
-          echo "count=$(gh pr list -B develop -H update-master -S '【Release → Master】' | wc -l)" >> "$GITHUB_OUTPUT"
+          echo "count=$(gh pr list -B develop -H ${{env.UPDATE_BRANCH}} -S '【Release → Master】' | wc -l)" >> "$GITHUB_OUTPUT"
       - name: Create Release Pull Request
         if: ${{ steps.check_pr.outputs.count == 0 }}
         run: |
           gh pr create \
             -B develop \
-            -H update-master \
+            -H ${{env.UPDATE_BRANCH}} \
             -t '【Release → Master】masterブランチの最新化' \
             -a ${{ github.actor }}  \
             --body "release → master "
