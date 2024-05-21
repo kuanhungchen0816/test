@@ -12,6 +12,28 @@ jobs:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
+      - name: Chek UpdateBranch branch Exists
+        id: check_branch
+        run: |
+          branch_is_existing=$(
+            git fetch origin update-master &&
+            echo true ||
+            echo false
+          )
+          echo "update-branch-exist=${branch_is_existing}" >> $GITHUB_OUTPUT
+      - name: update-branch-exist
+        run: |
+          echo "update-branch-exist=${{ steps.check_branch.outputs.update-branch-exist }}"
+      - name: Make branch when update-branch not exist
+        if: ${{ steps.check_branch.outputs.update-branch-exist == 'false' }}
+        run: |
+          gh pr checkout main
+          git checkout -b update-master
+      - name: Update branch when update-branch exist
+        if: ${{ steps.check_branch.outputs.update-branch-exist == 'true' }}
+        run: |
+          gh pr checkout update-master
+          git merge main
       - name: Check PullRequest Exists
         id: check_pr
         env:
@@ -19,9 +41,9 @@ jobs:
         run: |
           COMMIT_MESSAGE=$(echo "${HEAD_MESSAGE}" | sed -n -e 1p)
           echo "message=${COMMIT_MESSAGE}" >> "$GITHUB_OUTPUT"
-          echo "count=$(gh pr list -B develop -H main -S '【Release → Master】' | wc -l)" >> "$GITHUB_OUTPUT"
+          echo "count=$(gh pr list -B develop -H update-master -S '【Release → Master】' | wc -l)" >> "$GITHUB_OUTPUT"
       - name: test
         run: |
           echo "count=${{ steps.check_pr.outputs.count }}"
           echo "message=${{ steps.check_pr.outputs.message }}"
-          echo "$(gh pr list -B develop -H main -S '【Release → Master】' | wc -l)"
+          echo "$(gh pr list -B develop -H update-master -S '【Release → Master】' | wc -l)"
